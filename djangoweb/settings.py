@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'category',
     'accounts',
     'store',
+    'carts',
 
 ]
 
@@ -67,6 +68,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'category.context_processors.menu_links',  # ใช้ ฟังก์ชัน menu_links ได้ทุกเทมเพลต
+                'carts.context_processors.counter',  
             ],
         },
     },
