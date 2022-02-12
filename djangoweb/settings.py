@@ -137,3 +137,20 @@ STATICFILES_DIRS = [
 #media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+#ใส่ class boostrap ให้กับข้อความในระบบของ django
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+}
+
+
+# เกี่ยวกับการส่งอีเมล์
+# SMTP configuration
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'mixzazazaza1212@gmail.com'
+EMAIL_HOST_PASSWORD = '0948652696aAcC '
+EMAIL_POST = 587 #ของอีเมล์เท่ากับ 587
+EMAIL_USE_TLS = True

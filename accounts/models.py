@@ -61,6 +61,7 @@ class Account(AbstractBaseUser):
     objects = MyAccountManager()
 
 
+
     def __str__(self):
         return self.email
 
@@ -70,3 +71,5 @@ class Account(AbstractBaseUser):
     def has_module_perms(self, add_label):
         return True
 
+
+    
