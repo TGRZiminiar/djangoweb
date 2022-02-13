@@ -1,3 +1,4 @@
+from email import utils
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from accounts.forms import RegistrationForm
@@ -16,6 +17,7 @@ from django.core.mail import EmailMessage
 from carts.models import Cart,CartItem
 from carts.views import _cart_id
 import requests
+from urllib.parse import urlparse
 def create_user(self, first_name, last_name, username, email, password=None):
         if not email:
             raise ValueError('User must have an email address')
@@ -136,7 +138,7 @@ def login(request):
             url = request.META.get('HTTP_REFERER') #HTTP_REFERER จะเก็บค่า url จากหน้าก่อนหน้าที่มา
             try: #ที่ต้องทำโดยใช้ query เพราะว่าถ้าทำปกติไม่ได้
                  #ก็คือกด checkout แล้วต้องการให้ไปหน้าที่ต้องกรองข้อมูลลิ้งเป็น /cart/checkout/ เลยต้องใช้ query ไปเก็บค่า url มาก่อนแล้วใช้ dict กับ split ทำให้เหลือแค่ url ที่จะเอา
-                query = requests.utils.urlparse(url).query #เก็บค่า url หน้าก่อนหน้าในรูปแบบ url โดยใช้ requets
+                query = urlparse(utils.urldefragauth(url=url)).query #เก็บค่า url หน้าก่อนหน้าในรูปแบบ url โดยใช้ requets
                 #print('tihs is query',query)
                 #print('-----')
             #next=/cart/checkout/
