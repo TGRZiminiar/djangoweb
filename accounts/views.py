@@ -13,7 +13,9 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
-
+from carts.models import Cart,CartItem
+from carts.views import _cart_id
+import requests
 def create_user(self, first_name, last_name, username, email, password=None):
         if not email:
             raise ValueError('User must have an email address')
@@ -84,9 +86,69 @@ def login(request):
         user     = auth.authenticate(email=email,password = password)
 
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id = _cart_id(request)) #เรียกใช้ฟังก์ชันเก็บค่า sessionid จาก view cart 
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists() #กรองว่ามีข้อมูลที่เป็นสินค้าอยู่ในcartไหม
+                if is_cart_item_exists: #ถ้ามีสินค้าอยู่ใน cart
+                    cart_item =CartItem.objects.filter(cart = cart) #เก็บสินค้าที่อยู่ในรถเข็นไว้ในตัวแปร
+
+                    #เอาสินค้าใน cart มาเก็บไว้ใน list โดยใช้ card id หรือ session id
+                    product_variation = []
+                    for item in cart_item:
+                        variation = item.variation.all() #เอาค่าทุกอย่างของไซส์กับสีมาเก็บในตัวปแร
+                        product_variation.append(list(variation))
+
+                    #Get cart item from user to access his product variation
+                    cart_item = CartItem.objects.filter(user=user) #return cartitem object
+                    
+                    existing_var_list = [] #list รอรับสินค้าที่เคยมีอยู่แล้ว
+                    id = [] #list ว่างรอรับค่า id สินค้า
+                    for item in cart_item: #วนลูปสินค้าในcart
+                        existing_variation = item.variation.all() #เก็บสินค้าทั้งหมดไว้ในตัวแปลนึง
+                        existing_var_list.append(list(existing_variation)) #ใส่ลงไปใน list ที่สร้างรอไว้
+                        id.append(item.id) #เก็บไอดีสินค้าไว้ในตัวแปรlist ที่สร้าไว้
+
+                    #product_variation = [1,2,3,4,5,6]
+                    #existing_var_list = [4,6,2]
+
+                    #เช็คว่ามีสีหรือไซส์ตรงกับสิ่งที่เรามีอยู่ไหม
+                    for pr in product_variation:
+                        if pr == existing_var_list: # ถ้ามี
+                            index = existing_var_list.index(pr) #ให้รับตำแหย่งของค่าที่ตรงกันเก็บไว้
+                            item_id = id[index] #เก็บต่าของไอดีที่ตรงกับสินค้ากับที่มีในdatabase
+                            item = CartItem.objects.get(id=item_id) 
+                            item.quantity +=1
+                            item.user = user
+                            item.save()
+
+                        else:
+                            cart_item=CartItem.objects.filter(cart=cart)
+                        
+                            for item in cart_item:     
+                                item.user = user #เอาค่าสินค้าที่มีในตระกร้าเก็บไว้ใน user ที่มีตัวตน
+                                item.save()
+            
+            except:
+                pass
+
             auth.login(request,user)
             messages.success(request,'You are now in!')
-            return redirect('dashboard')
+            url = request.META.get('HTTP_REFERER') #HTTP_REFERER จะเก็บค่า url จากหน้าก่อนหน้าที่มา
+            try: #ที่ต้องทำโดยใช้ query เพราะว่าถ้าทำปกติไม่ได้
+                 #ก็คือกด checkout แล้วต้องการให้ไปหน้าที่ต้องกรองข้อมูลลิ้งเป็น /cart/checkout/ เลยต้องใช้ query ไปเก็บค่า url มาก่อนแล้วใช้ dict กับ split ทำให้เหลือแค่ url ที่จะเอา
+                query = requests.utils.urlparse(url).query #เก็บค่า url หน้าก่อนหน้าในรูปแบบ url โดยใช้ requets
+                #print('tihs is query',query)
+                #print('-----')
+            #next=/cart/checkout/
+                params = dict(x.split('=')for x in query.split('&')) #next จะเป็นค่า key // cart กับ checkout จะเป็น value
+                if 'next' in params:
+                    next_page = params['next']
+                    return redirect(next_page)
+                #print('tihs is params',params)
+                
+            except: 
+                return redirect('dashboard')
+            
         else:
             messages.error(request,'Invalid login.')
             return redirect('login')

@@ -26,8 +26,8 @@ Already verified? <a href="{% url 'login' %}">Login</a>
           {% include 'includesfolder/alerts.html' %}
 
           <form action="{% url 'login' %}" method="POST">
-              {% csrf_token %}
-              <div class="form-group">
+            {% csrf_token %}
+            <div class="form-group">
                  <input type="email" class="form-control" placeholder="Email Address" name = "email">
               </div> <!-- form-group// -->
               <div class="form-group">

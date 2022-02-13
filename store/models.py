@@ -1,7 +1,6 @@
 from category.models import category
 from django.db import models
 from django.urls import reverse
-
 # Create your models here.
 
 class Product(models.Model):
@@ -15,7 +14,6 @@ class Product(models.Model):
     category        = models.ForeignKey(category , on_delete=models.CASCADE)#เมื่อลบcategory สินค้าที่อยุ่ในแทคนี้จะโดนลบไปด้วย
     created_date    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now = True)
-
 
     
     def get_url(self):
