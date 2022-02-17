@@ -13,7 +13,7 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.payment_id
+        return self.payment_id 
 
 
 class Order(models.Model):
@@ -45,7 +45,11 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def full_name(self):
+        return f'{self.first_name}  {self.last_name}'
 
+    def full_address(self):
+        return f'{self.address_line_1}  {self.address_line_2}'
 
     def __str__(self):
         return self.first_name
@@ -62,6 +66,8 @@ class OrderProduct(models.Model):
     ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
 
     def __str__(self):
         return self.product.product_name
